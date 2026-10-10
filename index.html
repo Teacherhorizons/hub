@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Monthly placement points progress" />
+    <title>Placement points | Teacher Horizons Hub</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js?v=2" defer></script>
+  </head>
+  <body class="compact-desktop">
+    <main class="page-shell">
+      <header class="masthead" aria-label="Teacher Horizons Hub">
+        <div class="masthead-left">
+          <a class="brand" href="./" aria-label="Teacher Horizons Hub home">
+            <img src="assets/th-logo-swallow.png" alt="Teacher Horizons" />
+          </a>
+          <div class="month-control">
+            <h2 id="month-chip">From URL</h2>
+          </div>
+        </div>
+        <div class="mission-art">
+          <img
+            src="assets/october-haunted-house.png"
+            alt="October team mission: free the TH swallow"
+          />
+        </div>
+      </header>
+
+      <section class="tracker" aria-labelledby="page-title">
+        <div class="tracker-intro">
+          <p class="kicker">Monthly placement points</p>
+          <h1 id="page-title">
+            On our way to <span id="target-title">your target</span>
+          </h1>
+        </div>
+
+        <div id="content" class="content" aria-live="polite">
+          <div class="state-panel" role="status">
+            <span class="loading-dot" aria-hidden="true"></span>
+            <span>Reading your progress...</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

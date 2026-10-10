@@ -1,0 +1,9 @@
+{
+  "name": "teacher-horizons-hub",
+  "private": true,
+  "version": "0.1.0",
+  "description": "URL-driven placement points page for Teacher Horizons Hub",
+  "scripts": {
+    "test": "node --test"
+  }
+}
