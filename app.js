@@ -100,7 +100,7 @@
             <div class="zone-label">Team incentive<span>anything beyond ${format(target)}</span></div>
             <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(points, target)}" aria-label="${format(points)} of ${format(target)} points"></div>
             <div class="centre-copy"><strong>${format(points)}</strong><span>of <span>${format(target)}</span> placement points</span><em>${percentageLabel}% of target</em></div>
-            <img class="bird" src="assets/th-swallow.png" alt="" aria-hidden="true" style="left: ${displayRatio * 100}%">
+            <img class="bird${points === 0 ? " bird-still" : ""}" src="assets/th-swallow.png" alt="" aria-hidden="true" style="--bird-target: ${displayRatio * 100}%">
             <span class="gong" aria-label="Monthly target gong" role="img"></span>
             <span class="gong-caption"><span>${format(target)}</span> placement points<br>Monthly target</span>
           </div>
@@ -110,6 +110,31 @@
     document.querySelector("#month-value").textContent = month;
     document.querySelector("#month-chip").textContent = month;
     document.querySelector("#target-title").textContent = format(target);
+    if (points > 0) animateBird(displayRatio);
+  }
+
+  function animateBird(displayRatio) {
+    const bird = content.querySelector(".bird");
+    const track = content.querySelector(".track-wrap");
+    const updatePath = () => {
+      const destination = track.clientWidth * displayRatio;
+      const entry = destination * 0.45;
+      const radius = Math.min(24, destination * 0.2);
+      const handle = radius * 0.55228475;
+      const baseline =
+        track.querySelector(".track").offsetTop - bird.clientHeight / 2;
+      const bottom = baseline - 10;
+      const centre = bottom - radius;
+      const top = centre - radius;
+      const approach = Math.min(12, destination * 0.1);
+      bird.style.offsetPath = `path("M 0 ${baseline} C ${approach} ${baseline - approach} ${entry - handle} ${bottom} ${entry} ${bottom} C ${entry + handle} ${bottom} ${entry + radius} ${centre + handle} ${entry + radius} ${centre} C ${entry + radius} ${centre - handle} ${entry + handle} ${top} ${entry} ${top} C ${entry - handle} ${top} ${entry - radius} ${centre - handle} ${entry - radius} ${centre} C ${entry - radius} ${centre + handle} ${entry - handle} ${bottom} ${entry} ${bottom} C ${entry + handle} ${bottom} ${destination - approach} ${baseline + approach} ${destination} ${baseline}")`;
+      bird.classList.add("bird-flying");
+    };
+    bird.addEventListener("load", updatePath);
+    updatePath();
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(updatePath).observe(track);
+    }
   }
 
   function format(value) {
