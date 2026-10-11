@@ -110,24 +110,46 @@
     document.querySelector("#month-value").textContent = month;
     document.querySelector("#month-chip").textContent = month;
     document.querySelector("#target-title").textContent = format(target);
-    if (points > 0) animateBird(displayRatio);
+    if (points > 0)
+      animateBird(displayRatio, Math.max(1, Math.floor(points / 20)));
   }
 
-  function animateBird(displayRatio) {
+  function animateBird(displayRatio, loopCount) {
     const bird = content.querySelector(".bird");
     const track = content.querySelector(".track-wrap");
+    bird.style.animationDuration = `${Math.min(12, 3.8 + (loopCount - 1) * 0.75)}s`;
     const updatePath = () => {
       const destination = track.clientWidth * displayRatio;
-      const entry = destination * 0.45;
-      const radius = Math.min(24, destination * 0.2);
+      const entries =
+        loopCount === 1
+          ? [destination * 0.45]
+          : loopCount === 2
+            ? [destination * 0.3, destination * 0.7]
+            : Array.from(
+                { length: loopCount },
+                (_, index) => destination * ((index + 1) / (loopCount + 1)),
+              );
+      const radius = Math.min(
+        24,
+        destination * (loopCount === 1 ? 0.2 : 0.24 / loopCount),
+      );
       const handle = radius * 0.55228475;
       const baseline =
-        track.querySelector(".track").offsetTop - bird.clientHeight / 2;
+        track.querySelector(".track").offsetTop - bird.clientHeight / 2 + 8;
       const bottom = baseline - 10;
       const centre = bottom - radius;
       const top = centre - radius;
       const approach = Math.min(12, destination * 0.1);
-      bird.style.offsetPath = `path("M 0 ${baseline} C ${approach} ${baseline - approach} ${entry - handle} ${bottom} ${entry} ${bottom} C ${entry + handle} ${bottom} ${entry + radius} ${centre + handle} ${entry + radius} ${centre} C ${entry + radius} ${centre - handle} ${entry + handle} ${top} ${entry} ${top} C ${entry - handle} ${top} ${entry - radius} ${centre - handle} ${entry - radius} ${centre} C ${entry - radius} ${centre + handle} ${entry - handle} ${bottom} ${entry} ${bottom} C ${entry + handle} ${bottom} ${destination - approach} ${baseline + approach} ${destination} ${baseline}")`;
+      const loopPath = (entry) =>
+        `C ${entry + handle} ${bottom} ${entry + radius} ${centre + handle} ${entry + radius} ${centre} C ${entry + radius} ${centre - handle} ${entry + handle} ${top} ${entry} ${top} C ${entry - handle} ${top} ${entry - radius} ${centre - handle} ${entry - radius} ${centre} C ${entry - radius} ${centre + handle} ${entry - handle} ${bottom} ${entry} ${bottom}`;
+      let path = `M 0 ${baseline} C ${approach} ${baseline - approach} ${entries[0] - handle} ${bottom} ${entries[0]} ${bottom} ${loopPath(entries[0])}`;
+      for (let index = 1; index < entries.length; index += 1) {
+        const previous = entries[index - 1];
+        const entry = entries[index];
+        path += ` C ${previous + handle} ${bottom} ${entry - handle} ${bottom} ${entry} ${bottom} ${loopPath(entry)}`;
+      }
+      path += ` C ${entries[entries.length - 1] + handle} ${bottom} ${destination - approach} ${baseline + approach} ${destination} ${baseline}`;
+      bird.style.offsetPath = `path("${path}")`;
       bird.classList.add("bird-flying");
     };
     bird.addEventListener("load", updatePath);

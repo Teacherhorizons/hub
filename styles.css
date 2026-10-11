@@ -58,6 +58,7 @@ body::before {
 
   .compact-desktop .mission-art {
     width: 300px !important;
+    justify-self: right;
   }
 
   .compact-desktop .month-control {
@@ -473,7 +474,7 @@ h1 {
   }
 
   .mission-art {
-    width: 375px;
+    /* width: 375px; */
     margin: 0;
     border-radius: 13px;
     box-shadow: 0 16px 28px rgba(20, 44, 73, 0.14);
@@ -864,6 +865,7 @@ body::before {
 }
 
 .tracker-intro {
+  margin-top: 16px;
   max-width: none;
   text-align: center;
 }
@@ -1060,7 +1062,7 @@ h1 {
   }
 
   .mission-art {
-    width: 375px;
+    /* width: 375px; */
     margin: 0;
     border-radius: 13px;
   }

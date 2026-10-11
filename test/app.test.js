@@ -97,9 +97,43 @@ test("sets the swallow destination on the same scale as the progress bar", () =>
   assert.match(result.content.innerHTML, /class="bird"/);
   assert.match(result.content.innerHTML, /--bird-target: 17\.410714285714285%/);
   assert.doesNotMatch(result.content.innerHTML, /--bird-loop-/);
-  assert.match(result.bird.style.offsetPath, /^path\("M 0 80 C /);
+  assert.match(result.bird.style.offsetPath, /^path\("M 0 88 C /);
   assert.equal((result.bird.style.offsetPath.match(/ C /g) || []).length, 6);
-  assert.ok(result.bird.style.offsetPath.endsWith('139.28571428571428 80")'));
+  assert.ok(result.bird.style.offsetPath.endsWith('139.28571428571428 88")'));
+});
+
+test("adds a second flight loop from 40 points", () => {
+  const oneLoop = run("?month-name=October&target-points=56&points=39");
+  const twoLoops = run("?month-name=October&target-points=56&points=40");
+  assert.equal((oneLoop.bird.style.offsetPath.match(/ C /g) || []).length, 6);
+  assert.equal((twoLoops.bird.style.offsetPath.match(/ C /g) || []).length, 11);
+  assert.equal(twoLoops.bird.style.animationDuration, "4.55s");
+  assert.match(
+    twoLoops.bird.style.offsetPath,
+    /M 0 88 C 12 76 115\.31659457142855/,
+  );
+  assert.match(twoLoops.bird.style.offsetPath, /78 286\.7451659999999 78/);
+  assert.ok(twoLoops.bird.style.offsetPath.endsWith('428.57142857142856 88")'));
+});
+
+test("adds one loop for each additional 20 points", () => {
+  const threeLoops = run("?month-name=October&target-points=100&points=60");
+  const fourLoops = run("?month-name=October&target-points=100&points=80");
+  assert.equal(
+    (threeLoops.bird.style.offsetPath.match(/ C /g) || []).length,
+    16,
+  );
+  assert.equal(
+    (fourLoops.bird.style.offsetPath.match(/ C /g) || []).length,
+    21,
+  );
+  assert.equal(threeLoops.bird.style.animationDuration, "5.3s");
+  assert.equal(fourLoops.bird.style.animationDuration, "6.05s");
+});
+
+test("caps the flight duration for very high scores", () => {
+  const result = run("?month-name=October&target-points=160&points=300");
+  assert.equal(result.bird.style.animationDuration, "12s");
 });
 
 test("keeps the swallow at zero when no points have been earned", () => {
