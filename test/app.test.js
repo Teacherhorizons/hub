@@ -72,6 +72,16 @@ test("renders an encoded month and explicit over-target state", () => {
   assert.equal(result.targetTitle.textContent, "56");
   assert.match(result.content.innerHTML, /5 points above target/);
   assert.match(result.content.innerHTML, /class="celebrate incentive"/);
+  assert.match(result.content.innerHTML, /class="celebration"/);
+  assert.match(
+    result.content.innerHTML,
+    /class="celebration-gong" data-src="assets\/gong\.gif"/,
+  );
+  assert.match(result.content.innerHTML, /--gong-delay: 8\.3s/);
+  assert.equal(
+    (result.content.innerHTML.match(/class="confetti-piece"/g) || []).length,
+    120,
+  );
 });
 
 test("renders an incomplete state for missing values", () => {
@@ -100,6 +110,13 @@ test("sets the swallow destination on the same scale as the progress bar", () =>
   assert.match(result.bird.style.offsetPath, /^path\("M 0 88 C /);
   assert.equal((result.bird.style.offsetPath.match(/ C /g) || []).length, 6);
   assert.ok(result.bird.style.offsetPath.endsWith('139.28571428571428 88")'));
+});
+
+test("celebrates exactly reaching the target", () => {
+  const result = run("?month-name=October&target-points=56&points=56");
+  assert.match(result.content.innerHTML, /class="celebration"/);
+  assert.match(result.content.innerHTML, /--celebration-delay: 4\.55s/);
+  assert.match(result.content.innerHTML, /--gong-delay: 7\.55s/);
 });
 
 test("adds a second flight loop from 40 points", () => {

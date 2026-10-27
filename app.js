@@ -83,6 +83,12 @@
       points <= target
         ? (points / Math.max(target, 1)) * 0.75
         : Math.min(0.75 + ((points - target) / 15) * 0.25, 1);
+    const loopCount = points > 0 ? Math.max(1, Math.floor(points / 20)) : 0;
+    const flightDuration = loopCount
+      ? Math.min(12, 3.8 + (loopCount - 1) * 0.75)
+      : 0;
+    const celebrationMarkup =
+      points >= target ? createCelebrationMarkup(flightDuration) : "";
     content.innerHTML = `
       <section class="progress-card" aria-labelledby="month-value">
         <div class="progress-heading">
@@ -103,6 +109,7 @@
             <img class="bird${points === 0 ? " bird-still" : ""}" src="assets/th-swallow.png" alt="" aria-hidden="true" style="--bird-target: ${displayRatio * 100}%">
             <span class="gong" aria-label="Monthly target gong" role="img"></span>
             <span class="gong-caption"><span>${format(target)}</span> placement points<br>Monthly target</span>
+            ${celebrationMarkup}
           </div>
         </div>
         <p class="celebrate${isOver ? " incentive" : points === target ? " goal" : ""}" role="status" aria-label="${status}">${message}</p>
@@ -110,8 +117,31 @@
     document.querySelector("#month-value").textContent = month;
     document.querySelector("#month-chip").textContent = month;
     document.querySelector("#target-title").textContent = format(target);
-    if (points > 0)
-      animateBird(displayRatio, Math.max(1, Math.floor(points / 20)));
+    if (points >= target) scheduleGong(flightDuration + 3);
+    if (points > 0) animateBird(displayRatio, loopCount);
+  }
+
+  function createCelebrationMarkup(delay) {
+    const pieces = Array.from({ length: 120 }, (_, index) => {
+      const left = (index * 37) % 101;
+      const drift = Math.round(Math.sin(index * 2.4) * 90);
+      const rotation = (index * 47) % 360;
+      const hue = (index * 41) % 360;
+      const stagger = (index % 16) * 0.1;
+      return `<span class="confetti-piece" style="--confetti-left: ${left}%; --confetti-drift: ${drift}px; --confetti-rotation: ${rotation}deg; --confetti-hue: ${hue}; --confetti-stagger: ${stagger}s"></span>`;
+    }).join("");
+    return `<div class="celebration" aria-hidden="true" style="--celebration-delay: ${delay}s; --gong-delay: ${delay + 3}s"><img class="celebration-gong" data-src="assets/gong.gif" alt=""><div class="confetti-field">${pieces}</div></div>`;
+  }
+
+  function scheduleGong(delay) {
+    if (typeof window.setTimeout !== "function") return;
+    const gong = content.querySelector(".celebration-gong");
+    window.setTimeout(() => {
+      gong.setAttribute(
+        "src",
+        `${gong.getAttribute("data-src")}?start=${Date.now()}`,
+      );
+    }, delay * 1000);
   }
 
   function animateBird(displayRatio, loopCount) {

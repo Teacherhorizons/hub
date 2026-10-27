@@ -743,6 +743,74 @@ h1 {
   background: #8f5a00;
 }
 
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.confetti-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.celebration-gong {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: min(78vw, 520px);
+  max-height: 72vh;
+  object-fit: contain;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+  animation: gong-pop 5.6s var(--gong-delay) ease-out both;
+}
+
+@keyframes gong-pop {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  12%,
+  82% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -24px;
+  left: var(--confetti-left);
+  width: 9px;
+  height: 16px;
+  opacity: 0;
+  background: hsl(var(--confetti-hue) 82% 56%);
+  animation: confetti-rain 4.8s
+    calc(var(--celebration-delay) + var(--confetti-stagger))
+    cubic-bezier(0.2, 0.65, 0.35, 1) both;
+}
+
+@keyframes confetti-rain {
+  0% {
+    opacity: 0;
+    transform: translate(0, -20px) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--confetti-drift), 110vh)
+      rotate(var(--confetti-rotation));
+  }
+}
+
 .gong-caption {
   position: absolute;
   top: 80px;
@@ -788,6 +856,17 @@ h1 {
 
   .centre-copy strong {
     font-size: 2.4rem;
+  }
+
+  .confetti-piece {
+    opacity: 1;
+    animation: none;
+    transform: translate(var(--confetti-drift), 50vh)
+      rotate(var(--confetti-rotation));
+  }
+
+  .celebration-gong {
+    display: none;
   }
 }
 
