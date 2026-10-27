@@ -12,50 +12,50 @@
   <body class="hub-app">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <div class="hub-shell">
-      <aside class="hub-sidebar" aria-label="Primary navigation">
-        <a class="hub-brand" href="./" aria-label="Teacher Horizons Hub home">
-          <img src="assets/hub-icon.svg" alt="" />
+      <aside class="hub-sidebar flex flex-col min-h-screen p-10 bg-white border-r" aria-label="Primary navigation">
+        <a class="hub-brand flex items-center gap-3 no-underline" href="./" aria-label="Teacher Horizons Hub home">
+          <img class="w-12 h-12 object-contain" src="assets/hub-icon.svg" alt="" />
           <span>Hub</span>
         </a>
-        <nav class="hub-nav" aria-label="Hub sections">
-          <div class="hub-nav-group">
-            <a class="hub-nav-heading is-active" href="./" aria-current="page">Home</a>
-            <a class="hub-nav-link" href="/advisers/placement-points">
+        <nav class="hub-nav mt-12 pt-6 border-t" aria-label="Hub sections">
+          <div class="hub-nav-group mt-8">
+            <a class="hub-nav-heading block mb-4 text-sm font-normal no-underline is-active" href="./" aria-current="page">Home</a>
+            <a class="hub-nav-link flex items-center gap-2 py-2 pl-6 text-sm no-underline" href="/advisers/placement-points">
               Placement points
             </a>
           </div>
-          <div class="hub-nav-group">
-            <h2>Knowledge and documentation</h2>
-            <a class="hub-nav-sublink" href="/processes/">Processes</a>
-            <a class="hub-nav-sublink">Policies and how-tos</a>
-            <a class="hub-nav-sublink" href="/wiki/">Technical documentation</a>
-            <a class="hub-nav-sublink" href="/redoc/">API reference</a>
+          <div class="hub-nav-group mt-8">
+            <h2 class="mb-4 text-sm font-normal">Knowledge and documentation</h2>
+            <a class="hub-nav-sublink block py-2 pl-6 text-sm no-underline" href="/processes/">Processes</a>
+            <a class="hub-nav-sublink block py-2 pl-6 text-sm no-underline">Policies and how-tos</a>
+            <a class="hub-nav-sublink block py-2 pl-6 text-sm no-underline" href="/wiki/">Technical documentation</a>
+            <a class="hub-nav-sublink block py-2 pl-6 text-sm no-underline" href="/redoc/">API reference</a>
           </div>
-          <div class="hub-nav-group">
-            <h2>People and organisation</h2>
+          <div class="hub-nav-group mt-8">
+            <h2 class="mb-4 text-sm font-normal">People and organisation</h2>
           </div>
-          <div class="hub-nav-group">
-            <h2>Projects</h2>
+          <div class="hub-nav-group mt-8">
+            <h2 class="mb-4 text-sm font-normal">Projects</h2>
           </div>
         </nav>
       </aside>
 
-      <main id="main-content" class="hub-main">
-        <header class="mockup-home-header">
-          <h1 id="page-title">Home</h1>
+      <main id="main-content" class="hub-main w-full px-12 bg-white">
+        <header class="mockup-home-header pt-10">
+          <h1 id="page-title" class="m-0 text-lg font-bold">Home</h1>
         </header>
-        <form class="mockup-search" role="search" action="#search" method="get">
+        <form class="mockup-search grid items-center mt-8 min-h-20 p-3 pl-8 rounded" role="search" action="#search" method="get">
           <label class="sr-only" for="hub-search-input"
             >AI search and chat</label
           >
-          <span class="mockup-search-label">AI search and chat</span>
+          <span class="mockup-search-label text-sm">AI search and chat</span>
           <input
             id="hub-search-input"
             name="q"
             type="search"
             placeholder="Ask something about projects, processes or documentation..."
           />
-          <button type="submit" aria-label="Start AI search and chat">+</button>
+          <button class="grid w-10 h-10 p-0 items-center justify-center rounded-full cursor-pointer" type="submit" aria-label="Start AI search and chat">+</button>
         </form>
       </main>
     </div>
