@@ -43,152 +43,6 @@ body::before {
   background-size: 32px 32px;
 }
 
-/* Desktop tracker geometry */
-@media (min-width: 641px) {
-  .page-shell {
-    width: min(calc(100% - 60px), 840px);
-    padding-top: 40px;
-  }
-
-  .masthead {
-    grid-template-columns: 1fr 375px;
-    align-items: start;
-    gap: 30px;
-    min-height: 212px;
-  }
-
-  .masthead-left {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .brand img {
-    width: 202px;
-  }
-
-  .month-control {
-    margin: 26px 0 0;
-    gap: 14px;
-    font-size: 1rem;
-  }
-
-  .month-chip {
-    position: relative;
-    min-width: 142px;
-    padding: 12px 36px 12px 16px;
-  }
-
-  .month-chip::after {
-    position: absolute;
-    top: 17px;
-    right: 14px;
-    width: 7px;
-    height: 7px;
-    content: "";
-    border-right: 2px solid #143653;
-    border-bottom: 2px solid #143653;
-    transform: rotate(45deg);
-  }
-
-  .mission-art {
-    /* width: 375px; */
-    margin: 0;
-    border-radius: 13px;
-    box-shadow: 0 16px 28px rgba(20, 44, 73, 0.14);
-  }
-
-  .tracker {
-    margin: 28px 0 0;
-  }
-
-  .kicker {
-    margin-bottom: 14px;
-    font-size: 0.92rem;
-  }
-
-  h1 {
-    font-size: 3.25rem;
-    line-height: 1.08;
-  }
-
-  .content {
-    max-width: none;
-    margin: 38px 0 0;
-    padding: 32px 34px 40px;
-    border-radius: 26px;
-  }
-
-  .progress-card {
-    grid-template-columns: 1fr auto;
-    gap: 0 26px;
-    align-items: start;
-  }
-
-  .progress-heading {
-    grid-column: 1 / -1;
-    padding-bottom: 22px;
-    border-bottom: 1px solid #e2ebf0;
-  }
-
-  .month-label {
-    margin: 0;
-    font-size: 1.9rem;
-  }
-
-  .month-label::after {
-    content: " placement points";
-  }
-
-  .month-value {
-    display: block;
-  }
-
-  .progress-copy {
-    margin: 18px 0 0;
-    font-size: 1.08rem;
-  }
-
-  .score-block {
-    grid-column: 1 / -1;
-    display: none;
-    align-items: baseline;
-    gap: 10px;
-    margin: 24px 0 28px;
-  }
-
-  .score {
-    font-size: 3.8rem;
-  }
-
-  .score-unit {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 400;
-  }
-
-  .progress-badge {
-    margin: 0 0 0 4px;
-    padding: 8px 12px;
-    color: #36556e;
-    background: #e7f6f3;
-    border-radius: 999px;
-    font-size: 0.9rem;
-  }
-
-  .meter-track {
-    height: 16px;
-  }
-
-  .status-line {
-    margin-top: 18px;
-  }
-}
-
-.score-block {
-  display: none;
-}
-
 /* The original-style track is the card's only score presentation. */
 .score-block {
   display: none;
@@ -662,19 +516,6 @@ body::before {
   }
 }
 
-@media (min-width: 641px) {
-  .placement-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 30px;
-  }
-
-  .placement-page .mission-art {
-    width: 300px;
-    margin: 0;
-  }
-}
-
 .placement-page-main {
   padding-top: 12px;
 }
@@ -735,130 +576,25 @@ body::before {
   margin-top: 12px;
 }
 
-@media (min-width: 641px) {
-  .placement-page .mission-art {
-    margin-top: 0;
+@media (max-width: 640px) {
+  .hub-placement .track-wrap {
+    min-width: 0;
+    width: 100%;
+    margin-inline: 0;
+  }
+
+  .hub-placement .track-scroll {
+    overflow-x: hidden;
   }
 }
 
-/* Original tracker alignment */
-body {
-  color: #092f58;
-  background: #f4f8fc;
-  font-family: Arial, Helvetica, sans-serif;
-}
 
-body::before {
-  display: none;
-}
-
-.page-shell {
-  width: min(100% - 40px, 1180px);
-  padding-top: 24px;
-}
-
-.masthead {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  min-height: 180px;
-}
-
-.brand img {
-  display: block;
-  width: min(226px, 52vw);
-  height: auto;
-}
-
-.month-control {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 8px;
-  color: #143653;
-  font-size: 1rem;
-}
-
-.month-chip {
-  min-width: 142px;
-  padding: 12px 34px 12px 16px;
-  color: #143653;
-  background: white;
-  border: 1px solid #dce5ed;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(27, 57, 85, 0.06);
-  font-size: 0.96rem;
-}
-
-.tracker {
-  margin: 24px 0 34px;
-  padding: 0;
-  overflow: visible;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-
-.tracker::after {
-  display: none;
-}
-
-.tracker-intro {
-  margin-top: 16px;
-  max-width: none;
-  text-align: center;
-}
-
-.mission-art {
-  width: min(100%, 660px);
-  margin: 0 auto 34px;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 16px 28px rgba(20, 44, 73, 0.14);
-}
-
-.mission-art img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.kicker {
-  margin-bottom: 16px;
-  color: #146274;
-  font-size: 0.92rem;
-  letter-spacing: 0.16em;
-}
-
-h1 {
-  max-width: none;
-  color: #082e57;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: clamp(2.5rem, 7vw, 4.6rem);
-  font-weight: 400;
-  line-height: 1.08;
-}
-
-#target-title {
-  color: #ed6c5b;
-}
-
-.content {
-  max-width: 1080px;
-  margin: 38px auto 0;
-  padding: clamp(28px, 5vw, 48px);
-  background: white;
-  border: 1px solid #e2ebf0;
-  border-radius: 28px;
-  box-shadow: 0 5px 20px rgba(27, 57, 85, 0.05);
-}
-
-.progress-card {
+/* Placement progress presentation */
+.placement-page .progress-card {
   gap: 26px;
 }
 
-.month-label {
+.placement-page .month-label {
   color: #143653;
   font-size: 1.72rem;
   font-weight: 400;
@@ -867,223 +603,69 @@ h1 {
   text-transform: none;
 }
 
-.month-value {
-  display: none;
-}
-
-.progress-copy {
+.placement-page .progress-copy {
   margin-top: 20px;
   color: #143653;
   font-size: 1.08rem;
   text-align: left;
 }
 
-.score-block {
-  text-align: left;
-}
-
-.score {
+.placement-page .score {
   color: #092f58;
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(3.4rem, 8vw, 5.6rem);
   letter-spacing: -0.04em;
 }
 
-.score-unit,
-.meter-legend {
+.placement-page .score-unit {
   color: #36556e;
   letter-spacing: 0;
   text-transform: none;
 }
 
-.meter-track {
-  height: 22px;
-  background: #e7eef3;
-}
-
-.meter-fill {
-  background: #159a9b;
-}
-
-.meter-fill.over {
-  background: #ef765e;
-}
-
-.status-line {
-  color: #147276;
+.placement-page .progress-badge {
+  margin-left: 4px;
+  padding: 8px 12px;
+  color: #36556e;
   background: #e7f6f3;
-}
-
-.status-line.over {
-  color: #a1483b;
-  background: #fff0eb;
-}
-
-.footer {
-  color: #4f6a7e;
-}
-
-@media (max-width: 640px) {
-  .page-shell {
-    width: min(100% - 24px, 1180px);
-  }
-
-  .masthead {
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: 22px;
-    min-height: 0;
-  }
-
-  .month-control {
-    margin-bottom: 0;
-  }
-
-  .tracker {
-    margin-top: 32px;
-  }
-
-  .mission-art {
-    margin-bottom: 26px;
-    border-radius: 8px;
-  }
-
-  .content {
-    padding: 24px 18px;
-    border-radius: 18px;
-  }
-
-  .month-label {
-    font-size: 1.4rem;
-  }
+  border-radius: 999px;
+  font-size: 0.9rem;
 }
 
 @media (min-width: 641px) {
-  .page-shell {
-    width: min(calc(100% - 60px), 840px);
-    padding-top: 40px;
-  }
-
-  .masthead {
-    grid-template-columns: 1fr 375px;
-    align-items: start;
+  .placement-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
     gap: 30px;
-    min-height: 212px;
   }
 
-  .masthead-left {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+  .placement-page .mission-art {
+    width: 300px;
+    margin-top: 0;
   }
 
-  .brand img {
-    width: 202px;
-  }
-
-  .month-control {
-    margin: 26px 0 0;
-  }
-
-  .month-chip {
-    position: relative;
-  }
-
-  .month-chip::after {
-    position: absolute;
-    top: 17px;
-    right: 14px;
-    width: 7px;
-    height: 7px;
-    content: "";
-    border-right: 2px solid #143653;
-    border-bottom: 2px solid #143653;
-    transform: rotate(45deg);
-  }
-
-  .mission-art {
-    /* width: 375px; */
-    margin: 0;
-    border-radius: 13px;
-  }
-
-  .tracker {
-    margin: 28px 0 0;
-  }
-
-  h1 {
-    font-size: 3.25rem;
-  }
-
-  .content {
-    max-width: none;
-    margin: 38px 0 0;
-    padding: 32px 34px 40px;
-    border-radius: 26px;
-  }
-
-  .progress-card {
+  .placement-page .progress-card {
     grid-template-columns: 1fr auto;
-    gap: 0 26px;
     align-items: start;
   }
 
-  .progress-heading {
+  .placement-page .progress-heading {
     grid-column: 1 / -1;
-    padding-bottom: 22px;
-    border-bottom: 1px solid #e2ebf0;
   }
 
-  .month-label {
+  .placement-page .month-label {
     margin: 0;
     font-size: 1.9rem;
   }
 
-  .month-label::after {
+  .placement-page .month-label::after {
     content: " placement points";
   }
 
-  .month-value {
-    display: block;
-  }
-
-  .progress-copy {
-    margin: 18px 0 0;
-    font-size: 1.08rem;
-  }
-
-  .score-block {
+  .placement-page .score-block {
     grid-column: 1 / -1;
     display: flex;
     align-items: baseline;
     gap: 10px;
-    margin: 24px 0 28px;
-  }
-
-  .score {
-    font-size: 3.8rem;
-  }
-
-  .score-unit {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 400;
-  }
-
-  .progress-badge {
-    margin: 0 0 0 4px;
-    padding: 8px 12px;
-    color: #36556e;
-    background: #e7f6f3;
-    border-radius: 999px;
-    font-size: 0.9rem;
-  }
-
-  .meter-track {
-    height: 16px;
-  }
-
-  .status-line {
-    margin-top: 18px;
   }
 }
