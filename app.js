@@ -1,6 +1,7 @@
 (() => {
   const content = document.querySelector("#content");
   if (!content) return;
+  const missionImage = document.querySelector("#mission-art-image");
   const assetRoot =
     typeof window.location.pathname === "string" &&
     window.location.pathname.startsWith("/advisers/")
@@ -120,6 +121,8 @@
         </div>
         <p class="celebrate${isOver ? " incentive" : points === target ? " goal" : ""}" role="status" aria-label="${status}">${message}</p>
       </section>`;
+    missionImage.src = `${assetRoot}${missionAssetName(month)}`;
+    missionImage.alt = `${month} team mission: free the TH swallow`;
     document.querySelector("#month-value").textContent = month;
     document.querySelector("#month-chip").textContent = month;
     document.querySelector("#target-title").textContent = format(target);
@@ -197,5 +200,13 @@
 
   function format(value) {
     return new Intl.NumberFormat("en-GB").format(value);
+  }
+
+  function missionAssetName(month) {
+    const fileName = month
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    return `${fileName}.png`;
   }
 })();

@@ -537,6 +537,29 @@ body::before {
   font-weight: 300;
 }
 
+.placement-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+.placement-page .mission-art {
+  width: 300px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--hub-line);
+  border-radius: 13px;
+  box-shadow: 0 16px 28px rgba(20, 44, 73, 0.14);
+}
+
+.placement-page .mission-art img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .hub-month-chip {
   padding: 9px 14px;
   color: var(--hub-muted);
@@ -625,6 +648,96 @@ body::before {
 
   .placement-page-main {
     padding: 24px 20px 52px;
+  }
+
+  .placement-hero {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .placement-page .mission-art {
+    width: min(100%, 660px);
+    margin: 20px auto 0;
+    border-radius: 8px;
+  }
+}
+
+@media (min-width: 641px) {
+  .placement-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 30px;
+  }
+
+  .placement-page .mission-art {
+    width: 300px;
+    margin: 0;
+  }
+}
+
+.placement-page-main {
+  padding-top: 12px;
+}
+
+.hub-placement {
+  margin-top: 0;
+}
+
+.placement-hero {
+  margin-bottom: 12px;
+}
+
+.hub-placement .content {
+  margin-top: 12px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.hub-placement .progress-heading {
+  padding: 16px 24px 12px;
+}
+
+.hub-placement .score-block {
+  margin: 12px 0 16px;
+}
+
+.hub-placement .track-scroll {
+  padding: 0 12px;
+}
+
+.hub-placement .track-wrap {
+  height: 300px;
+}
+
+.hub-placement .track,
+.hub-placement .target-route-label,
+.hub-placement .zone-label,
+.hub-placement .bird,
+.hub-placement .gong,
+.hub-placement .gong-caption {
+  translate: 0 48px;
+}
+
+.hub-placement .track {
+  top: 130px;
+}
+
+.hub-placement .target-route-label,
+.hub-placement .zone-label {
+  top: 179px;
+}
+
+.placement-page .mission-art {
+  width: min(100%, 300px);
+  margin-top: 12px;
+}
+
+@media (min-width: 641px) {
+  .placement-page .mission-art {
+    margin-top: 0;
   }
 }
 
