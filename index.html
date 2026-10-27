@@ -3,45 +3,61 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Monthly placement points progress" />
-    <title>Placement points | Teacher Horizons Hub</title>
-    <link rel="stylesheet" href="styles.css?v=16" />
-    <script src="app.js?v=8" defer></script>
+    <meta name="description" content="Teacher Horizons Hub home" />
+    <title>Home | Teacher Horizons Hub</title>
+    <link rel="stylesheet" href="assets/global/th-global.css" />
+    <link rel="stylesheet" href="styles.css?v=17" />
+    <script src="app.js?v=11" defer></script>
   </head>
-  <body class="compact-desktop">
-    <main class="page-shell">
-      <header class="masthead" aria-label="Teacher Horizons Hub">
-        <div class="masthead-left">
-          <a class="brand" href="./" aria-label="Teacher Horizons Hub home">
-            <img src="assets/th-logo-swallow.png" alt="Teacher Horizons" />
-          </a>
-          <div class="month-control">
-            <h2 id="month-chip">From URL</h2>
+  <body class="hub-app">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <div class="hub-shell">
+      <aside class="hub-sidebar" aria-label="Primary navigation">
+        <a class="hub-brand" href="./" aria-label="Teacher Horizons Hub home">
+          <img src="assets/hub-icon.svg" alt="" />
+          <span>Hub</span>
+        </a>
+        <nav class="hub-nav" aria-label="Hub sections">
+          <div class="hub-nav-group">
+            <a class="hub-nav-heading is-active" href="./" aria-current="page">Home</a>
+            <a class="hub-nav-link" href="/advisers/placement-points">
+              Placement points
+            </a>
           </div>
-        </div>
-        <div class="mission-art">
-          <img
-            src="assets/october-haunted-house.png"
-            alt="October team mission: free the TH swallow"
+          <div class="hub-nav-group">
+            <h2>Knowledge and documentation</h2>
+            <a class="hub-nav-sublink" href="/processes/">Processes</a>
+            <a class="hub-nav-sublink">Policies and how-tos</a>
+            <a class="hub-nav-sublink" href="/wiki/">Technical documentation</a>
+            <a class="hub-nav-sublink" href="/redoc/">API reference</a>
+          </div>
+          <div class="hub-nav-group">
+            <h2>People and organisation</h2>
+          </div>
+          <div class="hub-nav-group">
+            <h2>Projects</h2>
+          </div>
+        </nav>
+      </aside>
+
+      <main id="main-content" class="hub-main">
+        <header class="mockup-home-header">
+          <h1 id="page-title">Home</h1>
+        </header>
+        <form class="mockup-search" role="search" action="#search" method="get">
+          <label class="sr-only" for="hub-search-input"
+            >AI search and chat</label
+          >
+          <span class="mockup-search-label">AI search and chat</span>
+          <input
+            id="hub-search-input"
+            name="q"
+            type="search"
+            placeholder="Ask something about projects, processes or documentation..."
           />
-        </div>
-      </header>
-
-      <section class="tracker" aria-labelledby="page-title">
-        <div class="tracker-intro">
-          <p class="kicker">Monthly placement points</p>
-          <h1 id="page-title">
-            On our way to <span id="target-title">your target</span>
-          </h1>
-        </div>
-
-        <div id="content" class="content" aria-live="polite">
-          <div class="state-panel" role="status">
-            <span class="loading-dot" aria-hidden="true"></span>
-            <span>Reading your progress...</span>
-          </div>
-        </div>
-      </section>
-    </main>
+          <button type="submit" aria-label="Start AI search and chat">+</button>
+        </form>
+      </main>
+    </div>
   </body>
 </html>

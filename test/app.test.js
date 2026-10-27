@@ -6,7 +6,7 @@ const vm = require("node:vm");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
 
-function run(search) {
+function run(search, pathname = "/") {
   const monthElement = { textContent: "" };
   const monthChip = { textContent: "" };
   const targetTitle = { textContent: "" };
@@ -58,7 +58,7 @@ function run(search) {
     URLSearchParams,
     Intl,
     document,
-    window: { location: { search } },
+    window: { location: { search, pathname } },
   });
   return { content, monthElement, monthChip, targetTitle, bird };
 }
@@ -158,4 +158,16 @@ test("keeps the swallow at zero when no points have been earned", () => {
   assert.match(result.content.innerHTML, /class="bird bird-still"/);
   assert.match(result.content.innerHTML, /--bird-target: 0%/);
   assert.equal(result.bird.style.offsetPath, undefined);
+});
+
+test("uses root-relative assets on the placement-points route", () => {
+  const result = run(
+    "?month-name=October&target-points=56&points=56",
+    "/advisers/placement-points/",
+  );
+  assert.match(result.content.innerHTML, /src="\.\.\/\.\.\/assets\/th-swallow\.png"/);
+  assert.match(
+    result.content.innerHTML,
+    /data-src="\.\.\/\.\.\/assets\/gong\.gif"/,
+  );
 });

@@ -1,5 +1,11 @@
 (() => {
   const content = document.querySelector("#content");
+  if (!content) return;
+  const assetRoot =
+    typeof window.location.pathname === "string" &&
+    window.location.pathname.startsWith("/advisers/")
+      ? "../../assets/"
+      : "assets/";
   const params = new URLSearchParams(window.location.search);
   const values = {
     month: params.get("month-name"),
@@ -106,7 +112,7 @@
             <div class="zone-label">Team incentive<span>anything beyond ${format(target)}</span></div>
             <div class="track" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(points, target)}" aria-label="${format(points)} of ${format(target)} points"></div>
             <div class="centre-copy"><strong>${format(points)}</strong><span>of <span>${format(target)}</span> placement points</span><em>${percentageLabel}% of target</em></div>
-            <img class="bird${points === 0 ? " bird-still" : ""}" src="assets/th-swallow.png" alt="" aria-hidden="true" style="--bird-target: ${displayRatio * 100}%">
+            <img class="bird${points === 0 ? " bird-still" : ""}" src="${assetRoot}th-swallow.png" alt="" aria-hidden="true" style="--bird-target: ${displayRatio * 100}%">
             <span class="gong" aria-label="Monthly target gong" role="img"></span>
             <span class="gong-caption"><span>${format(target)}</span> placement points<br>Monthly target</span>
             ${celebrationMarkup}
@@ -130,7 +136,7 @@
       const stagger = (index % 16) * 0.1;
       return `<span class="confetti-piece" style="--confetti-left: ${left}%; --confetti-drift: ${drift}px; --confetti-rotation: ${rotation}deg; --confetti-hue: ${hue}; --confetti-stagger: ${stagger}s"></span>`;
     }).join("");
-    return `<div class="celebration" aria-hidden="true" style="--celebration-delay: ${delay}s; --gong-delay: ${delay + 3}s"><img class="celebration-gong" data-src="assets/gong.gif" alt=""><div class="confetti-field">${pieces}</div></div>`;
+    return `<div class="celebration" aria-hidden="true" style="--celebration-delay: ${delay}s; --gong-delay: ${delay + 3}s"><img class="celebration-gong" data-src="${assetRoot}gong.gif" alt=""><div class="confetti-field">${pieces}</div></div>`;
   }
 
   function scheduleGong(delay) {
