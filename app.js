@@ -1,4 +1,212 @@
 (() => {
+  const searchForm = document.querySelector(".mockup-search");
+  const searchInput = document.querySelector("#hub-search-input");
+  if (searchForm && searchInput) {
+    const conversationState = {
+      conversationId: null,
+      generation: null,
+      ownerSubjectId: "hub-admin-prototype",
+      accessScopeClaims: { role: "admin", source: "wiki" },
+    };
+    const status = document.createElement("p");
+    status.className = "chat-api-status";
+    status.setAttribute("role", "status");
+    const conversation = document.createElement("section");
+    conversation.className = "chat-api-conversation";
+    conversation.setAttribute("aria-live", "polite");
+    conversation.setAttribute("aria-label", "Hub chat conversation");
+    const controls = document.createElement("div");
+    controls.className = "chat-api-controls";
+    const clearButton = document.createElement("button");
+    clearButton.className = "chat-api-clear";
+    clearButton.type = "button";
+    clearButton.textContent = "Clear conversation";
+    clearButton.hidden = true;
+    controls.appendChild(clearButton);
+    searchForm.insertAdjacentElement("afterend", status);
+    status.insertAdjacentElement("afterend", controls);
+    controls.insertAdjacentElement("afterend", conversation);
+
+    function resetConversationState() {
+      conversationState.conversationId = null;
+      conversationState.generation = null;
+      clearButton.hidden = true;
+      conversation.replaceChildren();
+    }
+
+    function renderConversation(snapshot) {
+      const turns = snapshot && Array.isArray(snapshot.turns) ? snapshot.turns : [];
+      conversation.replaceChildren();
+      turns.forEach((turn) => {
+        const payload = turn && turn.payload ? turn.payload : {};
+        const item = document.createElement("article");
+        item.className = `chat-api-turn chat-api-turn-${turn.role || "system"}`;
+        const heading = document.createElement("h2");
+        heading.textContent = turn.role === "user" ? "You" : "Hub";
+        const message = document.createElement("p");
+        message.textContent =
+          turn.role === "user"
+            ? payload.question || ""
+            : payload.answer || payload.reason || payload.outcome || "No answer was returned.";
+        item.append(heading, message);
+        if (turn.role === "assistant") appendReferences(item, payload);
+        conversation.appendChild(item);
+      });
+      if (snapshot && snapshot.conversation_id) {
+        conversationState.conversationId = snapshot.conversation_id;
+        conversationState.generation = snapshot.generation;
+        clearButton.hidden = false;
+      }
+    }
+
+    function sourceFamilyLabel(citation) {
+      const family = String(citation.sourceFamily || citation.source_family || "").toLowerCase();
+      if (family === "faq") return "FAQ";
+      if (family === "wiki") return "WIKI";
+      if (family === "processes") return "PROCESSES";
+      if (family === "redoc") return "ReDoc";
+      return family ? family.toUpperCase() : "SOURCE";
+    }
+
+    function relativeReferenceUrl(citation) {
+      const rawUrl = citation.canonicalUrl || citation.url || citation.sourceUrl || citation.sourcePath;
+      if (!rawUrl || typeof rawUrl !== "string") return null;
+      try {
+        const parsed = new URL(rawUrl, window.location.origin);
+        const path = parsed.pathname;
+        if (path === "/wiki" || path === "/wiki/") {
+          return parsed.hash || "/wiki/";
+        }
+        if (path.startsWith("/wiki/")) {
+          const documentName = decodeURIComponent(path.slice("/wiki/".length)).replace(/\.md$/i, "");
+          return `/wiki/#/${documentName}${parsed.hash && parsed.hash !== "#" ? parsed.hash : ""}`;
+        }
+        if (path.startsWith("/processes/") || path.startsWith("/redoc/")) {
+          return `${path}${parsed.search}${parsed.hash}`;
+        }
+        if (rawUrl.startsWith("/")) return rawUrl;
+      } catch (error) {
+        return null;
+      }
+      return null;
+    }
+
+    function appendReferences(item, payload) {
+      const references = [];
+      const seen = new Set();
+      const candidates = Array.isArray(payload.citations) ? [...payload.citations] : [];
+      const evidence = Array.isArray(payload.evidence) ? payload.evidence : [];
+      evidence.forEach((entry) => {
+        if (!entry || typeof entry !== "object") return;
+        candidates.push({ ...entry, ...(entry.citation || {}) });
+      });
+      candidates.forEach((citation) => {
+        if (!citation || typeof citation !== "object") return;
+        const url = relativeReferenceUrl(citation);
+        const headingPath = Array.isArray(citation.headingPath) ? citation.headingPath : [];
+        const identity = `${url || ""}|${headingPath.join("/")}`;
+        if (!url || seen.has(identity) || references.length >= 8) return;
+        seen.add(identity);
+        references.push({ citation, url, headingPath });
+      });
+      if (!references.length) return;
+
+      const section = document.createElement("div");
+      section.className = "chat-api-references";
+      const title = document.createElement("h3");
+      title.textContent = "References";
+      const list = document.createElement("ul");
+      references.forEach(({ citation, url, headingPath }) => {
+        const listItem = document.createElement("li");
+        const source = document.createElement("span");
+        source.className = "chat-api-reference-source";
+        source.textContent = sourceFamilyLabel(citation);
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = citation.sourceTitle || citation.title || citation.sourcePath || citation.sourceId || url;
+        listItem.append(source, link);
+        const section = headingPath.at(-1);
+        if (section && section !== link.textContent) {
+          const detail = document.createElement("span");
+          detail.className = "chat-api-reference-section";
+          detail.textContent = ` - ${section}`;
+          listItem.appendChild(detail);
+        }
+        list.appendChild(listItem);
+      });
+      section.append(title, list);
+      item.appendChild(section);
+    }
+
+    searchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = searchInput.value.trim();
+      if (!question) {
+        status.textContent = "Enter a question first.";
+        return;
+      }
+      status.textContent = "Asking the Hub...";
+      try {
+        const response = await fetch("/chat-api/chat", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question,
+            userRole: "admin",
+            sourceScope: "SR-003",
+            showEvidenceDetails: true,
+            ...conversationState,
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        status.textContent = payload.outcome || "The Hub returned a response.";
+        renderConversation(payload.conversation);
+        searchInput.value = "";
+      } catch (error) {
+        status.textContent = "Chat service is unavailable.";
+      }
+    });
+
+    clearButton.addEventListener("click", async () => {
+      if (!conversationState.conversationId) {
+        resetConversationState();
+        status.textContent = "Conversation cleared.";
+        return;
+      }
+      clearButton.disabled = true;
+      status.textContent = "Clearing conversation...";
+      try {
+        const response = await fetch("/chat-api/chat", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            operation: "clear_conversation",
+            requestId: `clear-${Date.now()}`,
+            conversationId: conversationState.conversationId,
+            ...conversationState,
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        resetConversationState();
+        status.textContent = payload.outcome || "Conversation cleared.";
+      } catch (error) {
+        status.textContent = "The conversation could not be cleared.";
+      } finally {
+        clearButton.disabled = false;
+      }
+    });
+  }
+
   const content = document.querySelector("#content");
   if (!content) return;
   const assetRoot =
