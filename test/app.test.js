@@ -37,6 +37,7 @@ function run(search, pathname = "/") {
   };
   const document = {
     querySelector(selector) {
+      if (selector === ".mockup-search" || selector === "#hub-search-input") return null;
       if (selector === "#content") return content;
       if (selector === "#month-value") return monthElement;
       if (selector === "#month-chip") return monthChip;
