@@ -6,11 +6,20 @@ const vm = require("node:vm");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
 
-function run(search, pathname = "/") {
+function run(search, pathname = "/", random = Math.random) {
+  const testMath = Object.create(Math);
+  testMath.random = random;
   const monthElement = { textContent: "" };
   const monthChip = { textContent: "" };
   const targetTitle = { textContent: "" };
   const missionImage = { src: "", alt: "" };
+  const placementHero = {
+    style: {
+      setProperty(name, value) {
+        this[name] = value;
+      },
+    },
+  };
   const bird = {
     style: {},
     offsetTop: 58,
@@ -43,6 +52,7 @@ function run(search, pathname = "/") {
       if (selector === "#month-chip") return monthChip;
       if (selector === "#target-title") return targetTitle;
       if (selector === "#mission-art-image") return missionImage;
+      if (selector === ".placement-hero") return placementHero;
       throw new Error(`Unexpected selector: ${selector}`);
     },
     createElement() {
@@ -59,10 +69,19 @@ function run(search, pathname = "/") {
   vm.runInNewContext(source, {
     URLSearchParams,
     Intl,
+    Math: testMath,
     document,
     window: { location: { search, pathname } },
   });
-  return { content, monthElement, monthChip, targetTitle, bird, missionImage };
+  return {
+    content,
+    monthElement,
+    monthChip,
+    targetTitle,
+    bird,
+    missionImage,
+    placementHero,
+  };
 }
 
 test("renders an encoded month and explicit over-target state", () => {
@@ -178,4 +197,21 @@ test("uses root-relative assets on the placement-points route", () => {
     /data-src="\.\.\/\.\.\/assets\/gong\.gif"/,
   );
   assert.equal(result.missionImage.src, "../../assets/october.png");
+});
+
+test("randomly selects a November mission image", () => {
+  const first = run(
+    "?month-name=November&target-points=80&points=17",
+    "/advisers/placement-points/",
+    () => 0,
+  );
+  const last = run(
+    "?month-name=November&target-points=80&points=17",
+    "/advisers/placement-points/",
+    () => 0.999,
+  );
+
+  assert.equal(first.missionImage.src, "../../assets/november-1.jpeg");
+  assert.equal(last.missionImage.src, "../../assets/november-3.jpeg");
+  assert.equal(first.placementHero.style["--mission-art-width"], "200px");
 });

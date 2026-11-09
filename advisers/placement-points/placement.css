@@ -400,7 +400,7 @@ body::before {
 }
 
 .placement-page .mission-art {
-  width: 300px;
+  width: var(--mission-art-width, 300px);
   margin: 0;
   overflow: hidden;
   border: 1px solid var(--hub-line);
@@ -411,7 +411,8 @@ body::before {
 .placement-page .mission-art img {
   display: block;
   width: 100%;
-  height: auto;
+  max-height: 200px;
+  object-fit: contain;
 }
 
 .hub-month-chip {
@@ -572,7 +573,7 @@ body::before {
 }
 
 .placement-page .mission-art {
-  width: min(100%, 300px);
+  width: min(100%, var(--mission-art-width, 300px));
   margin-top: 12px;
 }
 
@@ -587,7 +588,6 @@ body::before {
     overflow-x: hidden;
   }
 }
-
 
 /* Placement progress presentation */
 .placement-page .progress-card {
@@ -635,12 +635,12 @@ body::before {
 @media (min-width: 641px) {
   .placement-hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) var(--mission-art-width, 300px);
     gap: 30px;
   }
 
   .placement-page .mission-art {
-    width: 300px;
+    width: var(--mission-art-width, 300px);
     margin-top: 0;
   }
 
