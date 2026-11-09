@@ -1,4 +1,448 @@
 (() => {
+  const searchForm = document.querySelector(".mockup-search");
+  const searchInput = document.querySelector("#hub-search-input");
+  if (searchForm && searchInput) {
+    const conversationState = {
+      conversationId: null,
+      generation: null,
+      ownerSubjectId: "hub-admin-prototype",
+      accessScopeClaims: { role: "admin", source: "wiki" },
+    };
+    const status = document.createElement("p");
+    status.className = "chat-api-status";
+    status.setAttribute("role", "status");
+    const conversation = document.createElement("section");
+    conversation.className = "chat-api-conversation";
+    conversation.setAttribute("aria-live", "polite");
+    conversation.setAttribute("aria-label", "Hub chat conversation");
+    const controls = document.createElement("div");
+    controls.className = "chat-api-controls";
+    const clearButton = document.createElement("button");
+    clearButton.className = "chat-api-clear";
+    clearButton.type = "button";
+    clearButton.textContent = "Clear conversation";
+    clearButton.hidden = true;
+    controls.appendChild(clearButton);
+    searchForm.insertAdjacentElement("afterend", status);
+    status.insertAdjacentElement("afterend", controls);
+    controls.insertAdjacentElement("afterend", conversation);
+
+    function resetConversationState() {
+      conversationState.conversationId = null;
+      conversationState.generation = null;
+      clearButton.hidden = true;
+      conversation.replaceChildren();
+    }
+
+    function renderConversation(snapshot) {
+      const turns = snapshot && Array.isArray(snapshot.turns) ? snapshot.turns : [];
+      conversation.replaceChildren();
+      turns.forEach((turn) => {
+        const payload = turn && turn.payload ? turn.payload : {};
+        const item = document.createElement("article");
+        item.className = `chat-api-turn chat-api-turn-${turn.role || "system"}`;
+        const heading = document.createElement("h2");
+        heading.textContent = turn.role === "user" ? "You" : "Hub";
+        const message = document.createElement("p");
+        message.textContent =
+          turn.role === "user"
+            ? payload.question || ""
+            : payload.answer || payload.reason || payload.outcome || "No answer was returned.";
+        item.append(heading, message);
+            if (turn.role === "assistant") {
+              appendAnswerDetails(item, payload);
+              appendReferences(item, payload);
+              appendCommands(item, payload);
+              appendEvaluator(item, payload);
+              appendTelemetry(item, payload);
+            }
+        conversation.appendChild(item);
+      });
+      if (snapshot && snapshot.conversation_id) {
+        conversationState.conversationId = snapshot.conversation_id;
+        conversationState.generation = snapshot.generation;
+        clearButton.hidden = false;
+      }
+    }
+
+    function sourceFamilyLabel(citation) {
+      const family = String(citation.sourceFamily || citation.source_family || "").toLowerCase();
+      if (family === "faq") return "FAQ";
+      if (family === "wiki") return "WIKI";
+      if (family === "processes") return "PROCESSES";
+      if (family === "redoc") return "ReDoc";
+      return family ? family.toUpperCase() : "SOURCE";
+    }
+
+    function relativeReferenceUrl(citation) {
+      const rawUrl = citation.canonicalUrl || citation.url || citation.sourceUrl || citation.sourcePath;
+      if (!rawUrl || typeof rawUrl !== "string") return null;
+      try {
+        const parsed = new URL(rawUrl, window.location.origin);
+        const path = parsed.pathname;
+        if (path === "/wiki" || path === "/wiki/") {
+          return parsed.hash || "/wiki/";
+        }
+        if (path.startsWith("/wiki/")) {
+          const documentName = decodeURIComponent(path.slice("/wiki/".length)).replace(/\.md$/i, "");
+          return `/wiki/#/${documentName}${parsed.hash && parsed.hash !== "#" ? parsed.hash : ""}`;
+        }
+        if (path.startsWith("/processes/") || path.startsWith("/redoc/")) {
+          return `${path}${parsed.search}${parsed.hash}`;
+        }
+        if (rawUrl.startsWith("/")) return rawUrl;
+      } catch (error) {
+        return null;
+      }
+      return null;
+    }
+
+      function appendAnswerDetails(item, payload) {
+        const values = [];
+        if (payload.confidence !== null && payload.confidence !== undefined) {
+          const confidence = Number(payload.confidence);
+          if (Number.isFinite(confidence)) {
+            const percentage = Math.round(confidence <= 1 ? confidence * 100 : confidence);
+            values.push({ label: "Answer confidence", value: `${percentage}%`, tone: percentage >= 75 ? "good" : percentage >= 50 ? "caution" : "poor" });
+          }
+        }
+        if (payload.confidenceBand) values.push({ label: "Confidence band", value: payload.confidenceBand });
+        if (payload.confidenceBasis) values.push({ label: "Confidence basis", value: payload.confidenceBasis });
+        if (payload.uncertainty) values.push({ label: "Uncertainty", value: payload.uncertainty });
+        if (Array.isArray(payload.warnings)) payload.warnings.forEach((warning) => values.push({ label: "Warning", value: warning, tone: "caution" }));
+        if (payload.insufficientEvidenceReason) values.push({ label: "Evidence status", value: payload.insufficientEvidenceReason, tone: "caution" });
+        if (!values.length) return;
+
+        const section = document.createElement("div");
+        section.className = "chat-api-answer-details";
+        const title = document.createElement("h3");
+        title.textContent = "Answer signals";
+        section.appendChild(title);
+        values.forEach(({ label, value, tone }) => {
+          const row = document.createElement("div");
+          row.className = "chat-api-answer-detail";
+          const name = document.createElement("span");
+          name.textContent = label;
+          const result = document.createElement("strong");
+          if (tone) result.classList.add(`chat-api-score-${tone}`);
+          result.textContent = String(value);
+          row.append(name, result);
+          section.appendChild(row);
+        });
+        item.appendChild(section);
+      }
+
+    function appendReferences(item, payload) {
+      const references = [];
+      const seen = new Set();
+      const candidates = Array.isArray(payload.references)
+        ? [...payload.references]
+        : Array.isArray(payload.citations)
+          ? [...payload.citations]
+          : [];
+      const evidence = Array.isArray(payload.evidence) ? payload.evidence : [];
+      evidence.forEach((entry) => {
+        if (!entry || typeof entry !== "object") return;
+        candidates.push({ ...entry, ...(entry.citation || {}) });
+      });
+      candidates.forEach((citation) => {
+        if (!citation || typeof citation !== "object") return;
+        const url = relativeReferenceUrl(citation);
+        const headingPath = Array.isArray(citation.headingPath) ? citation.headingPath : [];
+        const label = citation.sourceTitle || citation.title || citation.sourcePath || citation.sourceId || headingPath.at(-1);
+        const identity = `${url || label || ""}|${headingPath.join("/")}`;
+        if ((!url && !label && !headingPath.length) || seen.has(identity) || references.length >= 8) return;
+        seen.add(identity);
+        references.push({ citation, url, headingPath });
+      });
+      if (!references.length) return;
+
+      const section = document.createElement("div");
+      section.className = "chat-api-references";
+      const title = document.createElement("h3");
+      title.textContent = "References";
+      const list = document.createElement("ul");
+      references.forEach(({ citation, url, headingPath }) => {
+        const listItem = document.createElement("li");
+        const source = document.createElement("span");
+        source.className = "chat-api-reference-source";
+        source.textContent = sourceFamilyLabel(citation);
+        const link = document.createElement(url ? "a" : "span");
+        if (url) {
+          link.href = url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        }
+        link.textContent = citation.sourceTitle || citation.title || citation.sourcePath || citation.sourceId || url;
+        listItem.append(source, link);
+        const section = headingPath.at(-1);
+        if (section && section !== link.textContent) {
+          const detail = document.createElement("span");
+          detail.className = "chat-api-reference-section";
+          detail.textContent = ` - ${section}`;
+          listItem.appendChild(detail);
+        }
+        list.appendChild(listItem);
+      });
+      section.append(title, list);
+      item.appendChild(section);
+    }
+
+      function appendCommands(item, payload) {
+        const commands = Array.isArray(payload.commands) ? payload.commands : [];
+        if (!commands.length) return;
+
+        const section = document.createElement("div");
+        section.className = "chat-api-commands";
+        const title = document.createElement("h3");
+        title.textContent = "Commands";
+        section.appendChild(title);
+
+        commands.forEach((command) => {
+          const commandValue = typeof command === "string"
+            ? command
+            : command && (command.command || command.text || command.value);
+          if (!commandValue) return;
+
+          const block = document.createElement("article");
+          block.className = "chat-api-command";
+          const code = document.createElement("code");
+          code.textContent = commandValue;
+          block.appendChild(code);
+
+          if (command && typeof command === "object") {
+            [
+              ["Platform", command.platform],
+              ["Purpose", command.purpose],
+              ["Provenance", command.provenance],
+            ].forEach(([label, value]) => {
+              if (!value) return;
+              const detail = document.createElement("span");
+              detail.className = "chat-api-command-detail";
+              detail.textContent = `${label}: ${value}`;
+              block.appendChild(detail);
+            });
+          }
+
+          const copy = document.createElement("button");
+          copy.className = "chat-api-command-copy";
+          copy.type = "button";
+          copy.textContent = "Copy";
+          copy.addEventListener("click", async () => {
+            try {
+              await navigator.clipboard.writeText(commandValue);
+              copy.textContent = "Copied";
+            } catch (error) {
+              copy.textContent = "Copy failed";
+            }
+          });
+          block.appendChild(copy);
+          section.appendChild(block);
+        });
+
+        if (section.children.length > 1) item.appendChild(section);
+      }
+
+      function appendEvaluator(item, payload) {
+        const evaluation = payload.jevEvaluation;
+        if (!evaluation || evaluation.status === "not_run") return;
+        const section = document.createElement("div");
+        section.className = "chat-api-evaluator";
+        const title = document.createElement("h3");
+        title.textContent = "JEV evaluation signals";
+        section.appendChild(title);
+
+        const summary = document.createElement("div");
+        summary.className = "chat-api-evaluator-summary";
+        const status = document.createElement("strong");
+        status.className = `chat-api-score chat-api-score-${evaluation.status === "selected" ? "good" : "caution"}`;
+        status.textContent = evaluation.status === "selected" ? "Evidence selected" : evaluation.status;
+        summary.appendChild(status);
+        if (evaluation.reason) {
+          const reason = document.createElement("span");
+          reason.textContent = evaluation.reason;
+          summary.appendChild(reason);
+        }
+        section.appendChild(summary);
+
+        const confidenceSignals = [];
+        (evaluation.evaluations || []).forEach((entry) => {
+          Object.entries(entry && entry.metrics ? entry.metrics : {}).forEach(([name, value]) => {
+            if (typeof value !== "number" || !/(confidence|scorepercent)/i.test(name)) return;
+            const normalized = value > 1 ? value / 100 : value;
+            if (Number.isFinite(normalized)) confidenceSignals.push(normalized);
+          });
+        });
+        if (confidenceSignals.length) {
+          const confidence = Math.max(...confidenceSignals);
+          const percentage = Math.round(Math.max(0, Math.min(confidence, 1)) * 100);
+          const signal = document.createElement("div");
+          signal.className = "chat-api-jev-confidence";
+          const label = document.createElement("span");
+          label.textContent = "JEV confidence signal";
+          const value = document.createElement("strong");
+          value.className = `chat-api-score-${percentage >= 75 ? "good" : percentage >= 50 ? "caution" : "poor"}`;
+          value.textContent = `${percentage}%`;
+          const bar = document.createElement("span");
+          bar.className = "chat-api-confidence-bar";
+          const fill = document.createElement("span");
+          fill.style.width = `${percentage}%`;
+          fill.className = `chat-api-confidence-fill chat-api-score-${percentage >= 75 ? "good" : percentage >= 50 ? "caution" : "poor"}`;
+          bar.appendChild(fill);
+          signal.append(label, value, bar);
+          section.appendChild(signal);
+        }
+
+        function scoreTone(name, value) {
+          if (typeof value !== "number") return "";
+          const normalized = name.toLowerCase().includes("confidence")
+            ? (value <= 1 ? value : value / 100)
+            : name.toLowerCase().includes("score") && value <= 2
+              ? value / 2
+              : null;
+          if (normalized === null) return "";
+          return normalized >= 0.75 ? "good" : normalized >= 0.5 ? "caution" : "poor";
+        }
+
+        function formatMetricValue(name, value) {
+          if (typeof value !== "number") return String(value);
+          if (name.toLowerCase().includes("confidence")) return `${Math.round(value * (value <= 1 ? 100 : 1))}%`;
+          if (name.toLowerCase() === "score" && value <= 2) return `${value} / 2`;
+          if (name.toLowerCase().includes("percent")) return `${Math.round(value * (value <= 1 ? 100 : 1))}%`;
+          return String(value);
+        }
+
+        const seen = new Set();
+        (evaluation.evaluations || []).forEach((entry) => {
+          const metrics = entry && entry.metrics;
+          if (!metrics || typeof metrics !== "object") return;
+          Object.entries(metrics).forEach(([name, value]) => {
+            if (value === null || typeof value === "object") return;
+            const key = `${name}:${value}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            const metric = document.createElement("div");
+            metric.className = "chat-api-evaluator-metric";
+            const label = document.createElement("span");
+            label.textContent = name;
+            const result = document.createElement("strong");
+            const tone = scoreTone(name, value);
+            if (tone) result.classList.add(`chat-api-score-${tone}`);
+            result.textContent = formatMetricValue(name, value);
+            metric.append(label, result);
+            section.appendChild(metric);
+          });
+        });
+        item.appendChild(section);
+      }
+
+      function appendTelemetry(item, payload) {
+        const telemetry = payload.telemetry;
+        if (!telemetry) return;
+        const section = document.createElement("div");
+        section.className = "chat-api-telemetry";
+        const title = document.createElement("h3");
+        title.textContent = "Response timing";
+        section.appendChild(title);
+        const labels = {
+          planning: "Luna planning",
+          sqlRetrieval: "SQL lookup",
+          jev: "JEV selection",
+          lunaInterpretation: "Luna interpretation",
+        };
+        Object.entries(telemetry.stages || {}).forEach(([name, stage]) => {
+          const metric = document.createElement("div");
+          metric.className = "chat-api-timing-row";
+          const label = document.createElement("span");
+          label.textContent = labels[name] || name;
+          const value = document.createElement("strong");
+          value.textContent = stage && stage.durationMs !== undefined
+            ? `${stage.durationMs} ms (${stage.status || "unknown"})`
+            : "Not run";
+          metric.append(label, value);
+          section.appendChild(metric);
+        });
+        const total = document.createElement("div");
+        total.className = "chat-api-timing-total";
+        total.textContent = `Total response: ${telemetry.totalMs ?? "unknown"} ms`;
+        section.appendChild(total);
+        item.appendChild(section);
+      }
+
+    searchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = searchInput.value.trim();
+      if (!question) {
+        status.textContent = "Enter a question first.";
+        return;
+      }
+      status.textContent = "Asking the Hub...";
+      const loading = document.createElement("p");
+      loading.className = "chat-api-loading";
+      loading.setAttribute("role", "status");
+      loading.textContent = "Working...";
+      conversation.appendChild(loading);
+      try {
+        const response = await fetch("/chat-api/chat", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            question,
+            userRole: "admin",
+            sourceScope: "SR-003",
+            showEvidenceDetails: true,
+            ...conversationState,
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        loading.remove();
+        status.textContent = payload.outcome || "The Hub returned a response.";
+        renderConversation(payload.conversation);
+        searchInput.value = "";
+      } catch (error) {
+        loading.remove();
+        status.textContent = "Chat service is unavailable.";
+      }
+    });
+
+    clearButton.addEventListener("click", async () => {
+      if (!conversationState.conversationId) {
+        resetConversationState();
+        status.textContent = "Conversation cleared.";
+        return;
+      }
+      clearButton.disabled = true;
+      status.textContent = "Clearing conversation...";
+      try {
+        const response = await fetch("/chat-api/chat", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            operation: "clear_conversation",
+            requestId: `clear-${Date.now()}`,
+            conversationId: conversationState.conversationId,
+            ...conversationState,
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        resetConversationState();
+        status.textContent = payload.outcome || "Conversation cleared.";
+      } catch (error) {
+        status.textContent = "The conversation could not be cleared.";
+      } finally {
+        clearButton.disabled = false;
+      }
+    });
+  }
+
   const content = document.querySelector("#content");
   if (!content) return;
   const missionImage = document.querySelector("#mission-art-image");
