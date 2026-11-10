@@ -350,7 +350,8 @@
           jev: "JEV selection",
           lunaInterpretation: "Luna interpretation",
         };
-        Object.entries(telemetry.stages || {}).forEach(([name, stage]) => {
+        ["planning", "sqlRetrieval", "jev", "lunaInterpretation"].forEach((name) => {
+          const stage = telemetry.stages && telemetry.stages[name];
           const metric = document.createElement("div");
           metric.className = "chat-api-timing-row";
           const label = document.createElement("span");
