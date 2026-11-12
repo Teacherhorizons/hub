@@ -6,10 +6,20 @@ const vm = require("node:vm");
 
 const source = fs.readFileSync(path.join(__dirname, "..", "app.js"), "utf8");
 
-function run(search, pathname = "/") {
+function run(search, pathname = "/", random = Math.random) {
+  const testMath = Object.create(Math);
+  testMath.random = random;
   const monthElement = { textContent: "" };
   const monthChip = { textContent: "" };
   const targetTitle = { textContent: "" };
+  const missionImage = { src: "", alt: "" };
+  const placementHero = {
+    style: {
+      setProperty(name, value) {
+        this[name] = value;
+      },
+    },
+  };
   const bird = {
     style: {},
     offsetTop: 58,
@@ -42,6 +52,8 @@ function run(search, pathname = "/") {
       if (selector === "#month-value") return monthElement;
       if (selector === "#month-chip") return monthChip;
       if (selector === "#target-title") return targetTitle;
+      if (selector === "#mission-art-image") return missionImage;
+      if (selector === ".placement-hero") return placementHero;
       throw new Error(`Unexpected selector: ${selector}`);
     },
     createElement() {
@@ -58,19 +70,33 @@ function run(search, pathname = "/") {
   vm.runInNewContext(source, {
     URLSearchParams,
     Intl,
+    Math: testMath,
     document,
     window: { location: { search, pathname } },
   });
-  return { content, monthElement, monthChip, targetTitle, bird };
+  return {
+    content,
+    monthElement,
+    monthChip,
+    targetTitle,
+    bird,
+    missionImage,
+    placementHero,
+  };
 }
 
 test("renders an encoded month and explicit over-target state", () => {
   const result = run(
-    "?month-name=October%20%26%20November&target-points=56&points=61",
+    "?month-name=October%20&target-points=56&points=61",
   );
-  assert.equal(result.monthElement.textContent, "October & November");
-  assert.equal(result.monthChip.textContent, "October & November");
+  assert.equal(result.monthElement.textContent, "October");
+  assert.equal(result.monthChip.textContent, "October");
   assert.equal(result.targetTitle.textContent, "56");
+  assert.equal(result.missionImage.src, "assets/october.png");
+  assert.equal(
+    result.missionImage.alt,
+    "October team mission: free the TH swallow",
+  );
   assert.match(result.content.innerHTML, /5 points above target/);
   assert.match(result.content.innerHTML, /class="celebrate incentive"/);
   assert.match(result.content.innerHTML, /class="celebration"/);
@@ -171,4 +197,22 @@ test("uses root-relative assets on the placement-points route", () => {
     result.content.innerHTML,
     /data-src="\.\.\/\.\.\/assets\/gong\.gif"/,
   );
+  assert.equal(result.missionImage.src, "../../assets/october.png");
+});
+
+test("randomly selects a November mission image", () => {
+  const first = run(
+    "?month-name=November&target-points=80&points=17",
+    "/advisers/placement-points/",
+    () => 0,
+  );
+  const last = run(
+    "?month-name=November&target-points=80&points=17",
+    "/advisers/placement-points/",
+    () => 0.999,
+  );
+
+  assert.equal(first.missionImage.src, "../../assets/november-1.jpeg");
+  assert.equal(last.missionImage.src, "../../assets/november-3.jpeg");
+  assert.equal(first.placementHero.style["--mission-art-width"], "200px");
 });

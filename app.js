@@ -446,6 +446,13 @@
 
   const content = document.querySelector("#content");
   if (!content) return;
+  const missionImage = document.querySelector("#mission-art-image");
+  const missionAssetVariants = {
+    november: ["november-1.jpeg", "november-2.jpeg", "november-3.jpeg"],
+  };
+  const missionArtWidthOverrides = {
+    november: "200px",
+  };
   const assetRoot =
     typeof window.location.pathname === "string" &&
     window.location.pathname.startsWith("/advisers/")
@@ -565,6 +572,13 @@
         </div>
         <p class="celebrate${isOver ? " incentive" : points === target ? " goal" : ""}" role="status" aria-label="${status}">${message}</p>
       </section>`;
+    missionImage.src = `${assetRoot}${missionAssetName(month)}`;
+    missionImage.alt = `${month} team mission: free the TH swallow`;
+    const placementHero = document.querySelector(".placement-hero");
+    placementHero.style.setProperty(
+      "--mission-art-width",
+      missionArtWidth(month),
+    );
     document.querySelector("#month-value").textContent = month;
     document.querySelector("#month-chip").textContent = month;
     document.querySelector("#target-title").textContent = format(target);
@@ -642,5 +656,25 @@
 
   function format(value) {
     return new Intl.NumberFormat("en-GB").format(value);
+  }
+
+  function missionAssetName(month) {
+    const fileName = monthFileName(month);
+    const variants = missionAssetVariants[fileName];
+    if (variants) {
+      return variants[Math.floor(Math.random() * variants.length)];
+    }
+    return `${fileName}.png`;
+  }
+
+  function missionArtWidth(month) {
+    return missionArtWidthOverrides[monthFileName(month)] || "300px";
+  }
+
+  function monthFileName(month) {
+    return month
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 })();
